@@ -5,9 +5,9 @@ API Activity - IT 3103
 
 This exercise is a demonstration of a microservices architecture with three services:
 
-**Product Service**
-**Customer Service**
-**Order Service**
+* Product Service
+* Customer Service
+* Order Service
 
 # PROJECT STRUCTURE
 
@@ -19,18 +19,18 @@ This exercise is a demonstration of a microservices architecture with three serv
 
 1. Clone the Repository
 
-git clone https://github.com/TheBaby1/Microservice-API_Exercise.git
-cd Microservice-API_Exercise
+  git clone https://github.com/TheBaby1/Microservice-API_Exercise.git
+  cd Microservice-API_Exercise
 
 2. Install Dependencies
 
 **for each service, navigate to its directory and install the dependencies:**
-cd product-service
-npm install
-cd ../customer-service
-npm install
-cd ../order-service
-npm install
+  cd product-service
+  npm install
+  cd ../customer-service
+  npm install
+  cd ../order-service
+  npm install
 
 3. Run the Services
 
