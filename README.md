@@ -25,12 +25,18 @@ This exercise is a demonstration of a microservices architecture with three serv
 2. Install Dependencies
 
 **for each service, navigate to its directory and install the dependencies:**
+```
   cd product-service
   npm install
+```
+```
   cd ../customer-service
   npm install
+```
+```
   cd ../order-service
   npm install
+```
 
 3. Run the Services
 
