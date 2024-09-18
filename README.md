@@ -18,9 +18,12 @@ This exercise is a demonstration of a microservices architecture with three serv
 # SETUP
 
 1. Clone the Repository
-
+```
   git clone https://github.com/TheBaby1/Microservice-API_Exercise.git
+```
+```
   cd Microservice-API_Exercise
+```
 
 2. Install Dependencies
 
