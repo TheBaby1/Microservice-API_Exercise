@@ -5,6 +5,36 @@ app.use(express.json());
 
 let customers = [];
 
+// jsonwebtoken
+const jwt = require('jsonwebtoken');
+
+function generateToken(user) {
+    const payload = {
+        id: user.id,
+        role: user.role
+    };
+    return jwt.sign(payload, 'yourSecretKey', { expiresIn: '1h' });
+}
+
+// Login Endpoint
+app.post('/login', (req, res) => {
+    const { username, password } = req.body;
+
+    const user = {
+        id: 1,
+        username: 'test',
+        password: 'password123',
+        role: 'admin'
+    }
+
+    if (username === user.username && password === user.password) {
+        const token = generateToken(user);
+        return res.json({ token });
+    } else {
+        return res.status(401).json({ message: 'Invalid username or password' });
+    }
+})
+
 // Route for Creating a Customer
 app.post('/customers', (req, res) => {
     try {

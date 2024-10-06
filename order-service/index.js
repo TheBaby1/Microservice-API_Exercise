@@ -1,13 +1,38 @@
 const express = require('express');
 const axios = require('axios');
 const app = express();
+const jwt = require('jsonwebtoken');
 
 app.use(express.json());
 
 let orders = [];
 
+// JWT Validation Middleware
+function authenticateToken(req, res, next) {
+
+    try {
+        const token = req.headers['authorization']?.split(' ')[1];
+
+        if (!token) {
+            return res.sendStatus(401);
+        }
+
+        jwt.verify(token, 'yourSecretKey', (err, user) => {
+            if (err) {
+                return res.sendStatus(403);
+            }
+            req.user = user;
+            next();
+        })
+
+    } catch (error) {
+        res.status(500).json({ message: 'Internal Server Error'});
+    }
+}
+
+
 // Route for Creating an Order
-app.post('/orders', async (req, res) => {
+app.post('/orders', authenticateToken, async (req, res) => {
     console.log(req.body);
     try {
         const { customerId, productId } = req.body;
@@ -30,7 +55,7 @@ app.post('/orders', async (req, res) => {
 })
 
 // Route for Retrieving Orders by ID
-app.get('/orders/:orderId', (req, res) => {
+app.get('/orders/:orderId', authenticateToken, (req, res) => {
     try {
         const order = orders.find(o => o.orderId == req.params.orderId);
 
@@ -46,7 +71,7 @@ app.get('/orders/:orderId', (req, res) => {
 })
 
 // Route for Retrieving all Orders 
-app.get('/orders', (req, res) => {
+app.get('/orders', authenticateToken, (req, res) => {
     try {
         if (!orders) {
             return res.status(400).json({ message: 'Orders Do Not Exist' });
@@ -60,7 +85,7 @@ app.get('/orders', (req, res) => {
 })
 
 // Route for Updating an Order by Id
-app.put('/orders/:orderId', async (req, res) => {
+app.put('/orders/:orderId', authenticateToken, async (req, res) => {
     try {
         const order = orders.find(o => o.orderId == req.params.orderId);
 
@@ -68,7 +93,7 @@ app.put('/orders/:orderId', async (req, res) => {
             return res.status(400).json({ message: 'Order Does Not Exist'});
         }
 
-        const { customerId, productId } = req.body;
+        const { customerId, productId } = req.body; 
 
         if (productId && productId !== order.productId) {
             const productResponse = await axios.get(`http://localhost:3001/products/${productId}`);
@@ -93,7 +118,7 @@ app.put('/orders/:orderId', async (req, res) => {
 })
 
 // Route for Deleting an Order by Id
-app.delete('/orders/:orderId', (req, res) => {
+app.delete('/orders/:orderId', authenticateToken, (req, res) => {
     try {
         orders = orders.filter(o => o.orderId != req.params.orderId);
         res.status(200).json({ message: 'Successfully Deleted Order' });

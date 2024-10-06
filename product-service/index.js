@@ -1,12 +1,48 @@
 const express = require('express');
 const app = express();
+const jwt = require('jsonwebtoken');
 
 app.use(express.json());
 
 let products = [];
 
+// JWT Validation Middleware
+function authenticateToken(req, res, next) {
+
+    try {
+        const token = req.headers['authorization']?.split(' ')[1];
+
+        if (!token) {
+            return res.sendStatus(401);
+        }
+
+        jwt.verify(token, 'yourSecretKey', (err, user) => {
+            if (err) {
+                return res.sendStatus(403);
+            }
+            req.user = user;
+            next();
+        })
+
+    } catch (error) {
+        res.status(500).json({ message: 'Internal Server Error'});
+    }
+}
+
+
+// RBAC (Role-Based Access Control) Middleware
+function authorizeRoles(...allowedRoles) {
+    return (req, res, next) => {
+        if (!allowedRoles.includes(req.user.role)) {
+            return res.status(403).json({ message: 'Access Denied' });
+        }
+        next();
+    }
+}
+
+
 // Route for Creating a Product
-app.post('/products', (req, res) => {
+app.post('/products', authenticateToken, authorizeRoles('admin'), (req, res) => {
     try {
         const productId = Date.now();
         const { name, price} = req.body;
@@ -30,7 +66,7 @@ app.post('/products', (req, res) => {
 })
 
 // (Optional Route) Route for Retrieving all products
-app.get('/products', (req, res) => {
+app.get('/products', authenticateToken, (req, res) => {
     try {
         if (!products) {
             return res.status(400).json({ message: 'Products Do Not Exist'});
@@ -45,7 +81,7 @@ app.get('/products', (req, res) => {
 
 
 // Route for Retrieving Product Details by ID
-app.get('/products/:productId', (req, res) => {
+app.get('/products/:productId', authenticateToken, authorizeRoles('admin'), (req, res) => {
     try {
         const product = products.find(p => p.productId == req.params.productId);
 
@@ -61,7 +97,7 @@ app.get('/products/:productId', (req, res) => {
 })
 
 // Route for Updating a Product by ID
-app.put('/products/:productId', (req, res) => {
+app.put('/products/:productId', authenticateToken, authorizeRoles('admin'), (req, res) => {
     try {
         const product = products.find(p => p.productId == req.params.productId);
 
@@ -78,7 +114,7 @@ app.put('/products/:productId', (req, res) => {
 })
 
 // Route for Deleting a Product by ID
-app.delete('/products/:productId', (req, res) => {
+app.delete('/products/:productId', authenticateToken, authorizeRoles('admin'), (req, res) => {
     try {
         products = products.filter(p => p.productId != req.params.productId);
         res.status(200).json({ message: 'Successfully Deleted Product'});
