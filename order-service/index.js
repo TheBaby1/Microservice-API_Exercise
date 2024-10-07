@@ -30,6 +30,15 @@ function authenticateToken(req, res, next) {
     }
 }
 
+// RBAC (Role-Based Access Control) Middleware
+function authorizeRoles(...allowedRoles) {
+    return (req, res, next) => {
+        if (!allowedRoles.includes(req.user.role)) {
+            return res.status(403).json({ message: 'Access Denied' });
+        }
+        next();
+    }
+}
 
 // Route for Creating an Order
 app.post('/orders', authenticateToken, async (req, res) => {
@@ -37,22 +46,36 @@ app.post('/orders', authenticateToken, async (req, res) => {
     try {
         const { customerId, productId } = req.body;
 
-        const customerResponse = await axios.get(`http://localhost:3002/customers/${customerId}`);
+        const token = req.headers['authorization'];
+
+        const customerResponse = await axios.get(`http://localhost:3002/customers/${customerId}`, {
+            headers: {
+                'Authorization': token 
+            }
+        });
         const customerName = customerResponse.data.name;
         const customerAge = customerResponse.data.age;
+        console.log('Customer Response:', customerResponse.data);
 
-        const productResponse = await axios.get(`http://localhost:3001/products/${productId}`);
+        const productResponse = await axios.get(`http://localhost:3001/products/${productId}`, {
+            headers: {
+                'Authorization': token 
+            }
+        });
         const productName = productResponse.data.name;
         const productPrice = productResponse.data.price;
+        console.log('Product Response:', productResponse.data);
 
         const order = { orderId: Date.now(), customerId, productId, customerName, productName, customerAge, productPrice };
         orders.push(order);
         res.status(200).send(order);
 
     } catch (error) {
+        console.error('Error creating order:', error);
         res.status(400).send('Invalid Customer or Product');
     }
-})
+});
+
 
 // Route for Retrieving Orders by ID
 app.get('/orders/:orderId', authenticateToken, (req, res) => {
@@ -71,7 +94,7 @@ app.get('/orders/:orderId', authenticateToken, (req, res) => {
 })
 
 // Route for Retrieving all Orders 
-app.get('/orders', authenticateToken, (req, res) => {
+app.get('/orders', authenticateToken, authorizeRoles('admin'), (req, res) => {
     try {
         if (!orders) {
             return res.status(400).json({ message: 'Orders Do Not Exist' });
@@ -118,7 +141,7 @@ app.put('/orders/:orderId', authenticateToken, async (req, res) => {
 })
 
 // Route for Deleting an Order by Id
-app.delete('/orders/:orderId', authenticateToken, (req, res) => {
+app.delete('/orders/:orderId', authenticateToken, authorizeRoles('admin'), (req, res) => {
     try {
         orders = orders.filter(o => o.orderId != req.params.orderId);
         res.status(200).json({ message: 'Successfully Deleted Order' });

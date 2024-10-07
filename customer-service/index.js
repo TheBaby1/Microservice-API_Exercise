@@ -15,6 +15,27 @@ function generateToken(user) {
     };
     return jwt.sign(payload, 'yourSecretKey', { expiresIn: '1h' });
 }
+function authenticateToken(req, res, next) {
+
+    try {
+        const token = req.headers['authorization']?.split(' ')[1];
+
+        if (!token) {
+            return res.sendStatus(401);
+        }
+
+        jwt.verify(token, 'yourSecretKey', (err, user) => {
+            if (err) {
+                return res.sendStatus(403);
+            }
+            req.user = user;
+            next();
+        })
+
+    } catch (error) {
+        res.status(500).json({ message: 'Internal Server Error'});
+    }
+}
 
 // Login Endpoint
 app.post('/login', (req, res) => {
@@ -74,7 +95,7 @@ app.get('/customers', (req, res) => {
 
 
 // Route for Retrieving Customer Details by ID
-app.get('/customers/:customerId', (req, res) => {
+app.get('/customers/:customerId', authenticateToken, (req, res) => {
     try {
         const customer = customers.find(p => p.customerId == req.params.customerId);
 

@@ -81,8 +81,11 @@ app.get('/products', authenticateToken, (req, res) => {
 
 
 // Route for Retrieving Product Details by ID
-app.get('/products/:productId', authenticateToken, authorizeRoles('admin'), (req, res) => {
+app.get('/products/:productId', authenticateToken, (req, res) => {
     try {
+        console.log('Product Array:', products);
+        console.log('Requested Product ID:', req.params.productId);
+
         const product = products.find(p => p.productId == req.params.productId);
 
         if (!product) {
