@@ -1,9 +1,16 @@
+const https = require('https');
+const fs = require('fs');
 const express = require('express');
 const app = express();
 
 app.use(express.json());
 
 let customers = [];
+
+const sslOptions = {
+    key: fs.readFileSync('D:/Microservice-API_Exercise/server.key'),
+    cert: fs.readFileSync('D:/Microservice-API_Exercise/server.cert')
+}
 
 // jsonwebtoken
 const jwt = require('jsonwebtoken');
@@ -137,6 +144,8 @@ app.delete('/customers/:customerId', (req, res) => {
     }
 })
 
-app.listen(3002, () => {
-    console.log('Customer Service is running on port 3002');
-})
+
+// Creating HTTPS server
+https.createServer(sslOptions, app).listen(3002, () => {
+    console.log('Customer Service running on HTTPS port 3002');
+});

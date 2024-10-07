@@ -1,3 +1,5 @@
+const https = require('https');
+const fs = require('fs');
 const express = require('express');
 const axios = require('axios');
 const app = express();
@@ -6,6 +8,11 @@ const jwt = require('jsonwebtoken');
 app.use(express.json());
 
 let orders = [];
+
+const sslOptions = {
+    key: fs.readFileSync('D:/Microservice-API_Exercise/server.key'),
+    cert: fs.readFileSync('D:/Microservice-API_Exercise/server.cert')
+}
 
 // JWT Validation Middleware
 function authenticateToken(req, res, next) {
@@ -150,7 +157,7 @@ app.delete('/orders/:orderId', authenticateToken, authorizeRoles('admin'), (req,
     }
 })
 
-
-app.listen(3003, () => {
-    console.log('Order service is running on port 3003');
-})
+// Creating HTTPS server
+https.createServer(sslOptions, app).listen(3003, () => {
+    console.log('Order Service running on HTTPS port 3003');
+});
