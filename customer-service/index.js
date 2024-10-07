@@ -1,4 +1,5 @@
 const express = require('express');
+const rateLimit = require('express-rate-limit');
 const app = express();
 
 app.use(express.json());
@@ -15,6 +16,14 @@ function generateToken(user) {
     };
     return jwt.sign(payload, 'yourSecretKey', { expiresIn: '1h' });
 }
+
+let limiter = rateLimit({
+    max: 5,
+    windowMs: 10 * 60 * 1000,
+    message: 'Too many requests.'
+});
+
+app.use('/api', limiter);
 
 // Login Endpoint
 app.post('/login', (req, res) => {
@@ -59,7 +68,7 @@ app.post('/customers', (req, res) => {
 })
 
 // (Optional Route) Route for Retrieving all customers
-app.get('/customers', (req, res) => {
+app.get('/customers', limiter, (req, res) => {
     try {
         if (!customers) {
             return res.status(400).json({ message: 'Customers Do Not Exist'});
