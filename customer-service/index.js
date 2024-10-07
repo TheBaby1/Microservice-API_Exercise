@@ -1,13 +1,20 @@
 const express = require('express');
+const jwt = require('jsonwebtoken');
+const rateLimit = require('express-rate-limit');
+const helmet = require('helmet');
+
 const app = express();
 
-app.use(express.json());
+app.use(helmet());
+
+// security http headers
+app.use(express.json({
+    limit: '20kb'
+}));
 
 let customers = [];
 
 // jsonwebtoken
-const jwt = require('jsonwebtoken');
-
 function generateToken(user) {
     const payload = {
         id: user.id,
@@ -15,6 +22,7 @@ function generateToken(user) {
     };
     return jwt.sign(payload, 'yourSecretKey', { expiresIn: '1h' });
 }
+
 function authenticateToken(req, res, next) {
 
     try {
@@ -36,6 +44,15 @@ function authenticateToken(req, res, next) {
         res.status(500).json({ message: 'Internal Server Error'});
     }
 }
+
+// rate limiter
+let limiter = rateLimit({
+    max: 5,
+    windowMs: 10 * 60 * 1000,
+    message: 'Too many requests.'
+});
+
+app.use('/api', limiter);
 
 // Login Endpoint
 app.post('/login', (req, res) => {
@@ -80,7 +97,7 @@ app.post('/customers', (req, res) => {
 })
 
 // (Optional Route) Route for Retrieving all customers
-app.get('/customers', (req, res) => {
+app.get('/customers', limiter, (req, res) => {
     try {
         if (!customers) {
             return res.status(400).json({ message: 'Customers Do Not Exist'});
@@ -95,7 +112,7 @@ app.get('/customers', (req, res) => {
 
 
 // Route for Retrieving Customer Details by ID
-app.get('/customers/:customerId', authenticateToken, (req, res) => {
+app.get('/customers/:customerId', authenticateToken, limiter, (req, res) => {
     try {
         const customer = customers.find(p => p.customerId == req.params.customerId);
 

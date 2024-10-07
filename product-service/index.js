@@ -1,8 +1,16 @@
 const express = require('express');
-const app = express();
 const jwt = require('jsonwebtoken');
+const rateLimit = require('express-rate-limit');
+const helmet = require('helmet');
 
-app.use(express.json());
+const app = express();
+
+app.use(helmet());
+
+// security http headers
+app.use(express.json({
+    limit: '20kb'
+}));
 
 let products = [];
 
@@ -40,6 +48,14 @@ function authorizeRoles(...allowedRoles) {
     }
 }
 
+// rate limiter
+let limiter = rateLimit({
+    max: 5,
+    windowMs: 10 * 60 * 1000,
+    message: 'Too many requests.'
+});
+
+app.use('/api', limiter);
 
 // Route for Creating a Product
 app.post('/products', authenticateToken, authorizeRoles('admin'), (req, res) => {
@@ -66,7 +82,7 @@ app.post('/products', authenticateToken, authorizeRoles('admin'), (req, res) => 
 })
 
 // (Optional Route) Route for Retrieving all products
-app.get('/products', authenticateToken, (req, res) => {
+app.get('/products', authenticateToken, limiter, (req, res) => {
     try {
         if (!products) {
             return res.status(400).json({ message: 'Products Do Not Exist'});
@@ -81,7 +97,7 @@ app.get('/products', authenticateToken, (req, res) => {
 
 
 // Route for Retrieving Product Details by ID
-app.get('/products/:productId', authenticateToken, (req, res) => {
+app.get('/products/:productId', authenticateToken, limiter, (req, res) => {
     try {
         console.log('Product Array:', products);
         console.log('Requested Product ID:', req.params.productId);
