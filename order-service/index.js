@@ -128,7 +128,7 @@ app.get('/orders/:orderId', authenticateToken, (req, res) => {
 })
 
 // Route for Retrieving all Orders 
-app.get('/orders', authenticateToken, authorizeRoles('admin'), (req, res) => {
+app.get('/orders', authenticateToken, authorizeRoles('admin'), limiter, (req, res) => {
     try {
         if (!orders) {
             return res.status(400).json({ message: 'Orders Do Not Exist' });
@@ -142,7 +142,7 @@ app.get('/orders', authenticateToken, authorizeRoles('admin'), (req, res) => {
 })
 
 // Route for Updating an Order by Id
-app.put('/orders/:orderId', authenticateToken, async (req, res) => {
+app.put('/orders/:orderId', authenticateToken, limiter, async (req, res) => {
     try {
         const order = orders.find(o => o.orderId == req.params.orderId);
 
@@ -175,7 +175,7 @@ app.put('/orders/:orderId', authenticateToken, async (req, res) => {
 })
 
 // Route for Deleting an Order by Id
-app.delete('/orders/:orderId', authenticateToken, authorizeRoles('admin'), (req, res) => {
+app.delete('/orders/:orderId', authenticateToken, authorizeRoles('admin'), limiter, (req, res) => {
     try {
         orders = orders.filter(o => o.orderId != req.params.orderId);
         res.status(200).json({ message: 'Successfully Deleted Order' });
