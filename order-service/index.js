@@ -47,6 +47,14 @@ function authorizeRoles(...allowedRoles) {
     }
 }
 
+// axiosInstance to allow requests with self-signed certificates
+
+const axiosInstance = axios.create({
+    httpsAgent: new https.Agent({  
+        rejectUnauthorized: false  // Disable SSL validation for self-signed certs
+    })
+});
+
 // Route for Creating an Order
 app.post('/orders', authenticateToken, async (req, res) => {
     console.log(req.body);
@@ -55,7 +63,7 @@ app.post('/orders', authenticateToken, async (req, res) => {
 
         const token = req.headers['authorization'];
 
-        const customerResponse = await axios.get(`http://localhost:3002/customers/${customerId}`, {
+        const customerResponse = await axiosInstance.get(`https://localhost:3002/customers/${customerId}`, {
             headers: {
                 'Authorization': token 
             }
@@ -64,7 +72,7 @@ app.post('/orders', authenticateToken, async (req, res) => {
         const customerAge = customerResponse.data.age;
         console.log('Customer Response:', customerResponse.data);
 
-        const productResponse = await axios.get(`http://localhost:3001/products/${productId}`, {
+        const productResponse = await axiosInstance.get(`https://localhost:3001/products/${productId}`, {
             headers: {
                 'Authorization': token 
             }
