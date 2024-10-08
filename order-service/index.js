@@ -5,6 +5,11 @@ const axios = require('axios');
 const app = express();
 const jwt = require('jsonwebtoken');
 
+const rateLimit = require('express-rate-limit');
+const helmet = require('helmet');
+
+app.use(helmet());
+
 app.use(express.json());
 
 let orders = [];
@@ -13,6 +18,20 @@ const sslOptions = {
     key: fs.readFileSync('D:/Microservice-API_Exercise/server.key'),
     cert: fs.readFileSync('D:/Microservice-API_Exercise/server.cert')
 }
+
+// security http headers
+app.use(express.json({
+    limit: '20kb'
+}));
+
+// rate limiter
+let limiter = rateLimit({
+    max: 5,
+    windowMs: 10 * 60 * 1000,
+    message: 'Too many requests.'
+});
+
+app.use('/api', limiter);
 
 // JWT Validation Middleware
 function authenticateToken(req, res, next) {

@@ -52,6 +52,15 @@ function authenticateToken(req, res, next) {
     }
 }
 
+function authorizeRoles(...allowedRoles) {
+    return (req, res, next) => {
+        if (!allowedRoles.includes(req.user.role)) {
+            return res.status(403).json({ message: 'Access Denied' });
+        }
+        next();
+    }
+}
+
 // rate limiter
 let limiter = rateLimit({
     max: 5,
@@ -135,7 +144,7 @@ app.get('/customers/:customerId', authenticateToken, limiter, (req, res) => {
 })
 
 // Route for Updating a Customer by ID
-app.put('/customers/:customerId', (req, res) => {
+app.put('/customers/:customerId', authenticateToken, authorizeRoles('admin'), (req, res) => {
     try {
         const customer = customers.find(p => p.customerId == req.params.customerId);
 
@@ -152,7 +161,7 @@ app.put('/customers/:customerId', (req, res) => {
 })
 
 // Route for Deleting a Customer by ID
-app.delete('/customers/:customerId', (req, res) => {
+app.delete('/customers/:customerId', authenticateToken, authorizeRoles('admin'), (req, res) => {
     try {
         customers = customers.filter(p => p.customerId != req.params.customerId);
         res.status(200).json({ message: 'Successfully Deleted Customer'});
