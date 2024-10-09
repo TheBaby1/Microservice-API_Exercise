@@ -59,7 +59,7 @@ function authorizeRoles(...allowedRoles) {
 let limiter = rateLimit({
     max: 5,
     windowMs: 10 * 60 * 1000,
-    message: 'Too many requests.'
+    message: 'You have exceeded the maximum number of allowed requests. Please try again later.'
 });
 
 app.use('/api', limiter);
@@ -123,7 +123,7 @@ app.get('/products/:productId', authenticateToken, limiter, (req, res) => {
 })
 
 // Route for Updating a Product by ID
-app.put('/products/:productId', authenticateToken, authorizeRoles('admin'), (req, res) => {
+app.put('/products/:productId', authenticateToken, authorizeRoles('admin'), limiter, (req, res) => {
     try {
         const product = products.find(p => p.productId == req.params.productId);
 
@@ -140,7 +140,7 @@ app.put('/products/:productId', authenticateToken, authorizeRoles('admin'), (req
 })
 
 // Route for Deleting a Product by ID
-app.delete('/products/:productId', authenticateToken, authorizeRoles('admin'), (req, res) => {
+app.delete('/products/:productId', authenticateToken, authorizeRoles('admin'), limiter, (req, res) => {
     try {
         products = products.filter(p => p.productId != req.params.productId);
         res.status(200).json({ message: 'Successfully Deleted Product'});
@@ -149,7 +149,7 @@ app.delete('/products/:productId', authenticateToken, authorizeRoles('admin'), (
     }
 })
 
-
+// Creating HTTPS Server
 https.createServer(sslOptions, app).listen(3001, () => {
     console.log('Product Service running on HTTPS port 3001');
 })

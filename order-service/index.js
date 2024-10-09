@@ -28,7 +28,7 @@ app.use(express.json({
 let limiter = rateLimit({
     max: 5,
     windowMs: 10 * 60 * 1000,
-    message: 'Too many requests.'
+    message: 'You have exceeded the maximum number of allowed requests. Please try again later.'
 });
 
 app.use('/api', limiter);
@@ -75,7 +75,7 @@ const axiosInstance = axios.create({
 });
 
 // Route for Creating an Order
-app.post('/orders', authenticateToken, async (req, res) => {
+app.post('/orders', authenticateToken, limiter, async (req, res) => {
     console.log(req.body);
     try {
         const { customerId, productId } = req.body;
@@ -112,7 +112,7 @@ app.post('/orders', authenticateToken, async (req, res) => {
 
 
 // Route for Retrieving Orders by ID
-app.get('/orders/:orderId', authenticateToken, (req, res) => {
+app.get('/orders/:orderId', authenticateToken, limiter, (req, res) => {
     try {
         const order = orders.find(o => o.orderId == req.params.orderId);
 

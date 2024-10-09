@@ -55,7 +55,7 @@ function authenticateToken(req, res, next) {
 function authorizeRoles(...allowedRoles) {
     return (req, res, next) => {
         if (!allowedRoles.includes(req.user.role)) {
-            return res.status(403).json({ message: 'Access Denied' });
+            return res.status(403).json({ message: 'You Are Not Authorized.' });
         }
         next();
     }
@@ -65,7 +65,7 @@ function authorizeRoles(...allowedRoles) {
 let limiter = rateLimit({
     max: 5,
     windowMs: 10 * 60 * 1000,
-    message: 'Too many requests.'
+    message: 'You have exceeded the maximum number of allowed requests. Please try again later.'
 });
 
 app.use('/api', limiter);
