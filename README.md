@@ -14,6 +14,14 @@ This exercise is a demonstration of a microservices architecture with three serv
 * product-service/ - service for managing products
 * customer-service/ - service for managing customers
 * order-service/ - service for managing orders
+* secure-gateway/ - configured Express Gateway for API management
+
+# TECHNOLOGIES USED
+* Node.js and Express.js for creating REST APIs in the microservices.
+* Express Gateway for API Gateway configuration.
+* JWT (JSON Web Tokens) for user authentication.
+* OpenSSL for generating SSL certificates to secure communication.
+* VSCode Terminal for running services and managing dependencies.
 
 # SETUP
 
