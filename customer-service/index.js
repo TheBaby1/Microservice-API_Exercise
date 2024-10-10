@@ -79,7 +79,7 @@ app.post('/login', (req, res) => {
         id: 1,
         username: 'test',
         password: 'password123',
-        role: 'admin'
+        role: 'customer'
     }
 
     if (username === user.username && password === user.password) {
