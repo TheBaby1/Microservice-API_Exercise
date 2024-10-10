@@ -48,6 +48,10 @@ This exercise is a demonstration of a microservices architecture with three serv
   cd ../order-service
   npm install
 ```
+```
+  cd ../secure-gateway
+  npm install
+```
 
 3. Run the Services
 
@@ -64,7 +68,10 @@ npm start
 cd order-service
 npm start
 ```
-
+```
+cd secure-gateway
+npm start
+```
 
 
 
