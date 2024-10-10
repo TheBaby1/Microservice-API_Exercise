@@ -6,10 +6,9 @@ const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
 
 const app = express();
-
 app.use(helmet());
 
-// security http headers
+// Security HTTP Headers
 app.use(express.json({
     limit: '20kb'
 }));
@@ -55,7 +54,7 @@ function authorizeRoles(...allowedRoles) {
     }
 }
 
-// rate limiter
+// Rate Limiter Middleware
 let limiter = rateLimit({
     max: 5,
     windowMs: 10 * 60 * 1000,

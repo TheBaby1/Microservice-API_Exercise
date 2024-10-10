@@ -6,7 +6,6 @@ const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
 
 const app = express();
-
 app.use(helmet());
 
 // security http headers
@@ -21,7 +20,7 @@ const sslOptions = {
     cert: fs.readFileSync('D:/Microservice-API_Exercise/server.cert')
 }
 
-// jsonwebtoken
+// JSON WEB TOKEN Generator
 function generateToken(user) {
     const payload = {
         id: user.id,
@@ -30,6 +29,7 @@ function generateToken(user) {
     return jwt.sign(payload, 'yourSecretKey', { expiresIn: '1h' });
 }
 
+// Token Validation Middleware
 function authenticateToken(req, res, next) {
 
     try {
@@ -52,6 +52,7 @@ function authenticateToken(req, res, next) {
     }
 }
 
+// RBAC (Role-Based Access Control) Middleware
 function authorizeRoles(...allowedRoles) {
     return (req, res, next) => {
         if (!allowedRoles.includes(req.user.role)) {
@@ -61,7 +62,7 @@ function authorizeRoles(...allowedRoles) {
     }
 }
 
-// rate limiter
+// Rate Limiter Middleware
 let limiter = rateLimit({
     max: 5,
     windowMs: 10 * 60 * 1000,

@@ -4,12 +4,10 @@ const express = require('express');
 const axios = require('axios');
 const app = express();
 const jwt = require('jsonwebtoken');
-
 const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
 
 app.use(helmet());
-
 app.use(express.json());
 
 let orders = [];
@@ -19,12 +17,12 @@ const sslOptions = {
     cert: fs.readFileSync('D:/Microservice-API_Exercise/server.cert')
 }
 
-// security http headers
+// Security HTTP Headers
 app.use(express.json({
     limit: '20kb'
 }));
 
-// rate limiter
+// Rate Limiter Middleware
 let limiter = rateLimit({
     max: 5,
     windowMs: 10 * 60 * 1000,
@@ -66,8 +64,7 @@ function authorizeRoles(...allowedRoles) {
     }
 }
 
-// axiosInstance to allow requests with self-signed certificates
-
+// axiosInstance to allow requests with self-signed certificates 
 const axiosInstance = axios.create({
     httpsAgent: new https.Agent({  
         rejectUnauthorized: false  // Disable SSL validation for self-signed certs
